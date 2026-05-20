@@ -1,0 +1,7 @@
+[2026-05-18T22:34:37+00:00] [supervise] launch attempt 1
+[2026-05-19T00:29:52+00:00] [supervise] launch attempt 1 exited rc=1
+[2026-05-19T00:29:52+00:00] [supervise] sleeping 30s before restart
+[2026-05-19T00:30:22+00:00] [supervise] launch attempt 2
+[2026-05-19T00:30:22+00:00] [supervise] launch attempt 2 exited rc=0
+[2026-05-19T00:30:22+00:00] [supervise] rc=0 — assuming completion or stop_file; exit
+[2026-05-19T00:30:22+00:00] [supervise] rc=0 — assuming completion or stop_file; exit

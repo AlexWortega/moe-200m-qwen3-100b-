@@ -1,0 +1,126 @@
+[run_100b] wall budget: elapsed=0s remaining=2592000s per-launch_cap=2591700s
+[run_100b] NPROC=4 GPUs=0,1,2,3
+[run_100b] WSD total=1525879 warmup=2000 decay=76294 ema_start=1449585
+[run_100b] ckpt_every=5000 eval_every=2000
+[run_100b] hf_push_every=10000000000 tokens
+[run_100b] batch=8 seq=2048 seed=0
+[init] params total 1.088 B  active 203.75 M
+[init]   embed                 97.24 M
+[init]   attn                  15.75 M
+[init]   router                 0.31 M
+[init]   shared_expert         29.49 M
+[init]   routed_experts       943.72 M
+[init]   dense_ffn              1.97 M
+[init]   norms                  0.01 M
+[init]   lm_head                0.00 M
+[init]   other                  0.00 M
+/home/alexw/.local/lib/python3.10/site-packages/torch/nn/parallel/distributed.py:2308: UserWarning: You passed find_unused_parameters=true to DistributedDataParallel, `_set_static_graph` will detect unused parameters automatically, so you do not need to set find_unused_parameters=true, just be sure these unused parameters will not change during training loop while calling `_set_static_graph`.
+  warnings.warn(
+/home/alexw/.local/lib/python3.10/site-packages/torch/nn/parallel/distributed.py:2308: UserWarning: You passed find_unused_parameters=true to DistributedDataParallel, `_set_static_graph` will detect unused parameters automatically, so you do not need to set find_unused_parameters=true, just be sure these unused parameters will not change during training loop while calling `_set_static_graph`.
+  warnings.warn(
+/home/alexw/.local/lib/python3.10/site-packages/torch/nn/parallel/distributed.py:2308: UserWarning: You passed find_unused_parameters=true to DistributedDataParallel, `_set_static_graph` will detect unused parameters automatically, so you do not need to set find_unused_parameters=true, just be sure these unused parameters will not change during training loop while calling `_set_static_graph`.
+  warnings.warn(
+/home/alexw/.local/lib/python3.10/site-packages/torch/nn/parallel/distributed.py:2308: UserWarning: You passed find_unused_parameters=true to DistributedDataParallel, `_set_static_graph` will detect unused parameters automatically, so you do not need to set find_unused_parameters=true, just be sure these unused parameters will not change during training loop while calling `_set_static_graph`.
+  warnings.warn(
+[init] starting at step 0, total=1525879
+[     0] loss=12.292 lm=12.050 cv=0.504 lr=0.00e+00 tok/s=13.8K  wall=4751ms  toks=0.00B  ema=0
+[    20] loss=12.287 lm=12.046 cv=0.491 lr=6.00e-06 tok/s=13.4K  wall=4893ms  toks=0.00B  ema=0
+[    40] loss=12.252 lm=12.011 cv=0.407 lr=1.20e-05 tok/s=13.8K  wall=4762ms  toks=0.00B  ema=0
+[    60] loss=12.171 lm=11.929 cv=0.435 lr=1.80e-05 tok/s=13.8K  wall=4765ms  toks=0.00B  ema=0
+[    80] loss=12.048 lm=11.805 cv=0.590 lr=2.40e-05 tok/s=13.5K  wall=4845ms  toks=0.01B  ema=0
+[   100] loss=11.781 lm=11.537 cv=0.928 lr=3.00e-05 tok/s=13.4K  wall=4898ms  toks=0.01B  ema=0
+[   120] loss=11.386 lm=11.138 cv=1.475 lr=3.60e-05 tok/s=13.4K  wall=4904ms  toks=0.01B  ema=0
+[   140] loss=10.772 lm=10.519 cv=2.502 lr=4.20e-05 tok/s=13.6K  wall=4822ms  toks=0.01B  ema=0
+[   160] loss=10.238 lm=9.986 cv=3.193 lr=4.80e-05 tok/s=13.8K  wall=4758ms  toks=0.01B  ema=0
+[   180] loss=9.579 lm=9.333 cv=3.330 lr=5.40e-05 tok/s=13.9K  wall=4722ms  toks=0.01B  ema=0
+[   200] loss=8.913 lm=8.672 cv=3.532 lr=6.00e-05 tok/s=13.5K  wall=4859ms  toks=0.01B  ema=0
+[   220] loss=8.256 lm=8.023 cv=3.621 lr=6.60e-05 tok/s=14.2K  wall=4622ms  toks=0.01B  ema=0
+[   240] loss=8.114 lm=7.889 cv=3.636 lr=7.20e-05 tok/s=14.2K  wall=4625ms  toks=0.02B  ema=0
+[   260] loss=7.870 lm=7.654 cv=3.580 lr=7.80e-05 tok/s=13.7K  wall=4777ms  toks=0.02B  ema=0
+[   280] loss=7.565 lm=7.355 cv=3.447 lr=8.40e-05 tok/s=13.6K  wall=4827ms  toks=0.02B  ema=0
+[   300] loss=7.373 lm=7.167 cv=3.439 lr=9.00e-05 tok/s=13.7K  wall=4773ms  toks=0.02B  ema=0
+[   320] loss=7.171 lm=6.967 cv=3.438 lr=9.60e-05 tok/s=13.7K  wall=4783ms  toks=0.02B  ema=0
+[   340] loss=7.341 lm=7.141 cv=3.416 lr=1.02e-04 tok/s=14.1K  wall=4639ms  toks=0.02B  ema=0
+[   360] loss=7.268 lm=7.071 cv=3.374 lr=1.08e-04 tok/s=14.1K  wall=4634ms  toks=0.02B  ema=0
+[   380] loss=6.964 lm=6.767 cv=3.374 lr=1.14e-04 tok/s=14.2K  wall=4619ms  toks=0.02B  ema=0
+[   400] loss=6.955 lm=6.758 cv=3.355 lr=1.20e-04 tok/s=14.2K  wall=4611ms  toks=0.03B  ema=0
+[   420] loss=6.826 lm=6.630 cv=3.339 lr=1.26e-04 tok/s=14.1K  wall=4664ms  toks=0.03B  ema=0
+[   440] loss=6.806 lm=6.612 cv=3.305 lr=1.32e-04 tok/s=14.1K  wall=4650ms  toks=0.03B  ema=0
+[   460] loss=6.512 lm=6.318 cv=3.295 lr=1.38e-04 tok/s=13.8K  wall=4765ms  toks=0.03B  ema=0
+[   480] loss=6.922 lm=6.734 cv=3.228 lr=1.44e-04 tok/s=13.5K  wall=4858ms  toks=0.03B  ema=0
+[   500] loss=6.777 lm=6.590 cv=3.234 lr=1.50e-04 tok/s=13.7K  wall=4790ms  toks=0.03B  ema=0
+[   520] loss=6.665 lm=6.478 cv=3.205 lr=1.56e-04 tok/s=13.5K  wall=4854ms  toks=0.03B  ema=0
+[   540] loss=6.384 lm=6.200 cv=3.199 lr=1.62e-04 tok/s=14.1K  wall=4650ms  toks=0.04B  ema=0
+[   560] loss=6.380 lm=6.200 cv=3.175 lr=1.68e-04 tok/s=14.1K  wall=4645ms  toks=0.04B  ema=0
+[   580] loss=6.279 lm=6.101 cv=3.114 lr=1.74e-04 tok/s=13.4K  wall=4905ms  toks=0.04B  ema=0
+[   600] loss=6.663 lm=6.486 cv=3.088 lr=1.80e-04 tok/s=13.4K  wall=4889ms  toks=0.04B  ema=0
+[   620] loss=6.364 lm=6.190 cv=3.064 lr=1.86e-04 tok/s=14.0K  wall=4667ms  toks=0.04B  ema=0
+[   640] loss=6.187 lm=6.017 cv=3.021 lr=1.92e-04 tok/s=14.1K  wall=4648ms  toks=0.04B  ema=0
+[   660] loss=6.206 lm=6.041 cv=2.974 lr=1.98e-04 tok/s=14.1K  wall=4644ms  toks=0.04B  ema=0
+[   680] loss=6.226 lm=6.064 cv=2.931 lr=2.04e-04 tok/s=14.0K  wall=4686ms  toks=0.04B  ema=0
+[   700] loss=5.973 lm=5.815 cv=2.899 lr=2.10e-04 tok/s=14.0K  wall=4687ms  toks=0.05B  ema=0
+[   720] loss=5.946 lm=5.794 cv=2.826 lr=2.16e-04 tok/s=14.0K  wall=4674ms  toks=0.05B  ema=0
+[   740] loss=6.219 lm=6.071 cv=2.780 lr=2.22e-04 tok/s=14.0K  wall=4669ms  toks=0.05B  ema=0
+[   760] loss=5.829 lm=5.689 cv=2.699 lr=2.28e-04 tok/s=13.9K  wall=4711ms  toks=0.05B  ema=0
+[   780] loss=5.763 lm=5.628 cv=2.567 lr=2.34e-04 tok/s=14.0K  wall=4693ms  toks=0.05B  ema=0
+[   800] loss=5.733 lm=5.606 cv=2.503 lr=2.40e-04 tok/s=14.0K  wall=4691ms  toks=0.05B  ema=0
+[   820] loss=5.894 lm=5.773 cv=2.399 lr=2.46e-04 tok/s=13.8K  wall=4733ms  toks=0.05B  ema=0
+[   840] loss=5.725 lm=5.609 cv=2.317 lr=2.52e-04 tok/s=13.5K  wall=4846ms  toks=0.06B  ema=0
+[   860] loss=5.915 lm=5.806 cv=2.249 lr=2.58e-04 tok/s=13.5K  wall=4859ms  toks=0.06B  ema=0
+[   880] loss=5.548 lm=5.446 cv=2.170 lr=2.64e-04 tok/s=13.4K  wall=4886ms  toks=0.06B  ema=0
+[   900] loss=5.295 lm=5.198 cv=2.086 lr=2.70e-04 tok/s=13.6K  wall=4805ms  toks=0.06B  ema=0
+[   920] loss=5.818 lm=5.729 cv=1.962 lr=2.76e-04 tok/s=13.8K  wall=4764ms  toks=0.06B  ema=0
+[   940] loss=5.427 lm=5.344 cv=1.938 lr=2.82e-04 tok/s=13.7K  wall=4771ms  toks=0.06B  ema=0
+[   960] loss=5.745 lm=5.665 cv=1.799 lr=2.88e-04 tok/s=13.0K  wall=5024ms  toks=0.06B  ema=0
+[   980] loss=5.371 lm=5.296 cv=1.768 lr=2.94e-04 tok/s=13.8K  wall=4753ms  toks=0.06B  ema=0
+[  1000] loss=5.340 lm=5.269 cv=1.646 lr=3.00e-04 tok/s=13.7K  wall=4785ms  toks=0.07B  ema=0
+[  1020] loss=4.845 lm=4.781 cv=1.685 lr=3.06e-04 tok/s=13.7K  wall=4787ms  toks=0.07B  ema=0
+[  1040] loss=5.392 lm=5.330 cv=1.588 lr=3.12e-04 tok/s=13.7K  wall=4780ms  toks=0.07B  ema=0
+[  1060] loss=5.107 lm=5.050 cv=1.557 lr=3.18e-04 tok/s=13.2K  wall=4950ms  toks=0.07B  ema=0
+[  1080] loss=5.113 lm=5.061 cv=1.487 lr=3.24e-04 tok/s=13.0K  wall=5025ms  toks=0.07B  ema=0
+[  1100] loss=5.037 lm=4.988 cv=1.492 lr=3.30e-04 tok/s=13.1K  wall=5014ms  toks=0.07B  ema=0
+[  1120] loss=5.066 lm=5.022 cv=1.548 lr=3.36e-04 tok/s=13.1K  wall=5012ms  toks=0.07B  ema=0
+[  1140] loss=5.202 lm=5.161 cv=1.424 lr=3.42e-04 tok/s=13.7K  wall=4787ms  toks=0.07B  ema=0
+[  1160] loss=4.933 lm=4.894 cv=1.422 lr=3.48e-04 tok/s=13.7K  wall=4778ms  toks=0.08B  ema=0
+[  1180] loss=5.136 lm=5.099 cv=1.449 lr=3.54e-04 tok/s=13.7K  wall=4781ms  toks=0.08B  ema=0
+[  1200] loss=4.587 lm=4.553 cv=1.362 lr=3.60e-04 tok/s=13.7K  wall=4775ms  toks=0.08B  ema=0
+[1208] NaN/Inf grad — skip; new scale=524288
+[  1220] loss=5.170 lm=5.140 cv=1.406 lr=3.66e-04 tok/s=13.7K  wall=4771ms  toks=0.08B  ema=0
+[ckpt] wrote ckpts_100b/step_1221.pt
+W0518 19:21:23.866000 139938949355328 torch/distributed/elastic/agent/server/api.py:741] Received Signals.SIGTERM death signal, shutting down workers
+W0518 19:21:23.868000 139938949355328 torch/distributed/elastic/multiprocessing/api.py:851] Sending process 1505278 closing signal SIGTERM
+W0518 19:21:23.868000 139938949355328 torch/distributed/elastic/multiprocessing/api.py:851] Sending process 1505279 closing signal SIGTERM
+W0518 19:21:23.869000 139938949355328 torch/distributed/elastic/multiprocessing/api.py:851] Sending process 1505280 closing signal SIGTERM
+[sigterm] caught signum=15; will checkpoint at next step boundary
+W0518 19:21:23.881000 139938949355328 torch/distributed/elastic/multiprocessing/api.py:851] Sending process 1505281 closing signal SIGTERM
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/home/alexw/ml-intern-runs/moe-200m-qwen3-100b/train/train_200m.py", line 634, in <module>
+[rank0]:     main()
+[rank0]:   File "/home/alexw/ml-intern-runs/moe-200m-qwen3-100b/train/train_200m.py", line 630, in main
+[rank0]:     run(args)
+[rank0]:   File "/home/alexw/ml-intern-runs/moe-200m-qwen3-100b/train/train_200m.py", line 496, in run
+[rank0]:     save_ckpt(best_path, model, opt, sched, ema, step, rng, cfg,
+[rank0]:   File "/home/alexw/ml-intern-runs/moe-200m-qwen3-100b/train/train_200m.py", line 105, in save_ckpt
+[rank0]:     torch.save(sd, tmp)
+[rank0]:   File "/home/alexw/.local/lib/python3.10/site-packages/torch/serialization.py", line 628, in save
+[rank0]:     _save(obj, opened_zipfile, pickle_module, pickle_protocol, _disable_byteorder_record)
+[rank0]:   File "/home/alexw/.local/lib/python3.10/site-packages/torch/serialization.py", line 862, in _save
+[rank0]:     zip_file.write_record(name, storage, num_bytes)
+[rank0]:   File "/home/alexw/.local/lib/python3.10/site-packages/torch/utils/data/_utils/signal_handling.py", line 66, in handler
+[rank0]:     _error_if_any_worker_fails()
+[rank0]: RuntimeError: DataLoader worker (pid 1506364) is killed by signal: Terminated. 
+Exception ignored in atexit callback: <function _MultiProcessingDataLoaderIter._clean_up_worker at 0x7fdfa7743c70>
+Traceback (most recent call last):
+  File "/home/alexw/.local/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 1473, in _clean_up_worker
+    w.join(timeout=_utils.MP_STATUS_CHECK_INTERVAL)
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 149, in join
+    res = self._popen.wait(timeout)
+  File "/usr/lib/python3.10/multiprocessing/popen_fork.py", line 40, in wait
+    if not wait([self.sentinel], timeout):
+  File "/usr/lib/python3.10/multiprocessing/connection.py", line 931, in wait
+    ready = selector.select(timeout)
+  File "/usr/lib/python3.10/selectors.py", line 416, in select
+    fd_event_list = self._selector.poll(timeout)
+  File "/home/alexw/.local/lib/python3.10/site-packages/torch/utils/data/_utils/signal_handling.py", line 66, in handler
+    _error_if_any_worker_fails()
+RuntimeError: DataLoader worker (pid 1509203) is killed by signal: Terminated. 

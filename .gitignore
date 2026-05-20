@@ -1,0 +1,39 @@
+# Large binary checkpoints (kept on /mnt, separately published to HF)
+ckpts_100b
+ckpts/
+
+# Agent stream-json logs (multi-MB each, noisy)
+agent.log
+optimize.log
+pass2.log
+variantA.log
+fix_cv.log
+dead_experts.log
+
+# Training stdouts (multi-MB)
+train_100b.stdout.sup*
+train_100b_run*.stdout
+train_100b_legacy*.log
+train_100b_run*_*.log
+
+# Backup files
+*.bak_*
+*.pt.tmp
+
+# Archive of prior failed runs
+archive/
+
+# Bench artifacts
+notes/
+__pycache__/
+
+# Anchor files
+.run_*_start_t.txt
+.stop_*
+
+# Lock files
+.lock
+*.lock
+
+# Editor
+*.swp
