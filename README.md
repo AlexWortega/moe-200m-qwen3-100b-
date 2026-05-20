@@ -8,13 +8,34 @@ This repo holds source code, configs, run reports and diagnostics. **Model check
 
 ## Architecture
 
+This is **NOT** DeepSeek-V3 or V4. It borrows the load-balancing scheme (aux-loss-free bias router + sigmoid gating + shared-expert pattern) and tightens it for fp16 on V100. The expensive V3/V4 components are dropped or simplified.
+
+### What we kept from DeepSeek-MoE / V3
+
+* **Aux-loss-free bias controller** for load balancing — main inspiration. We extended it with magnitude updates and a starved-expert boost.
+* **Sigmoid-gated router** (V3 dropped softmax in favour of sigmoid; we follow this).
+* **1 shared + N routed top-K** expert layout.
+* **Layer-0 dense**, MoE from layer 1 onwards.
+
+### What we deliberately don't have
+
+| V3/V4 feature | We have | Reason |
+|---|---|---|
+| **MLA** (Multi-head Latent Attention with q/kv low-rank compression + decoupled RoPE key) | Plain GQA (10q/2kv, partial RoPE) | MLA's decoupled-RoPE-key path is fiddly under fp16 + torch.compile + Liger CE; GQA gets ~80% of the KV-cache win with much less surface area. |
+| **256 fine-grained experts** + tiny `d_ff` | 16 experts × `d_ff=1024` | 256 grouped GEMMs hit Volta tensor-core efficiency hard (no async copy). Larger experts × fewer of them = better MFU on V100. |
+| **Multi-Token Prediction (MTP) heads** | Single-token next-token LM | MTP is a training-time scheme aimed at long-horizon planning; we're doing a small-model pretrain where it's not the bottleneck. |
+| **Node-limited routing** + **capacity factor** | Top-K with auxiliary loss + bias | Capacity-factor token-drops are an answer to multi-node EP, which we don't have (single-node 2-GPU DDP). |
+| **V4-specific**: CSA compressor, mHC hyper-connections, hash routing, sqrtsoftplus gate | None | These are V4 features designed for ≥670B parameter scale; over-engineered for a 200M-active model. |
+
+### Resulting architecture
+
 | | |
 |---|---|
 | Active params | 203.59 M |
 | Total params | 0.616 B |
 | Layers | 16 (1 dense layer-0 + 15 MoE) |
 | `d_model` | 640 |
-| Attention | GQA, 10 q-heads / 2 kv-heads, head_dim 64 |
+| Attention | **GQA**, 10 q-heads / 2 kv-heads, head_dim 64 |
 | RoPE | Partial (half head_dim rotated) |
 | Norm | RMSNorm + QK-Norm |
 | MoE per layer | 16 routed + 1 shared experts, top-2, `d_ff=1024` |
@@ -23,12 +44,12 @@ This repo holds source code, configs, run reports and diagnostics. **Model check
 | Embedding | Tied (embed + LM head share weights) |
 | Loss | Liger fused linear + cross-entropy |
 
-Per-layer numerics:
+### Per-layer numerics (V100 + fp16 hardening)
 
-* Router forward wrapped in `torch.cuda.amp.autocast(enabled=False)` — fp32 routing avoids fp16 overflow when bias-clamped logits reach the ±20 range.
-* Magnitude-based bias controller with starved-expert boost.
-* Router noise (`std=0.1`) for exploration during training.
-* `dist.all_reduce(counts)` before bias update — required under DDP `broadcast_buffers=True`.
+* Router forward wrapped in `torch.cuda.amp.autocast(enabled=False)` — fp32 routing avoids fp16 overflow when bias-clamped logits reach the ±20 range. The single biggest stability fix on this hardware.
+* Magnitude-based bias controller with starved-expert boost (10× rate when load < 10% of fair share).
+* Router noise (`std=0.1`) for exploration during training. Eval is noise-free.
+* `dist.all_reduce(counts)` before bias update — required because DDP `broadcast_buffers=True` would otherwise overwrite per-rank bias updates with rank-0's view, halving the controller signal.
 
 See [`model.py`](./model.py) for the full implementation.
 
