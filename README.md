@@ -30,7 +30,168 @@ Per-layer numerics:
 * Router noise (`std=0.1`) for exploration during training.
 * `dist.all_reduce(counts)` before bias update — required under DDP `broadcast_buffers=True`.
 
-See `model.py` for the full implementation.
+See [`model.py`](./model.py) for the full implementation.
+
+---
+
+## Model code (key pieces)
+
+### Architecture diagram
+
+```
+input_ids (B, S)
+   │
+   ▼
+embed (vocab=151936, d=640, tied)
+   │
+   ▼
+┌─ Block 0  ──────────────────────  dense layer ──┐
+│  RMSNorm → GQA(10q/2kv, RoPE-partial, QK-Norm) →│
+│  RMSNorm → SwiGLU FFN (d_ff=1024)               │
+└─────────────────────────────────────────────────┘
+   │
+   ▼
+┌─ Block 1..15  ──────────────────  MoE layers ───┐
+│  RMSNorm → GQA → residual                       │
+│  RMSNorm → MoE block                            │
+│     │                                            │
+│     ├─ Router (fp32) → top-2 routing            │
+│     │    └─ aux-free bias controller            │
+│     │       + magnitude update                  │
+│     │       + starved-expert boost              │
+│     │       + ε noise (training)                │
+│     │                                            │
+│     ├─ 16 routed SwiGLU experts (d_ff=1024)     │
+│     └─ 1 shared SwiGLU expert (always-on)       │
+│  → weighted sum → residual                       │
+└─────────────────────────────────────────────────┘
+   │
+   ▼
+RMSNorm → tied LM head → Liger fused linear+CE
+   │
+   ▼
+loss (scalar) + aux dict {z_loss, aux_loss, counts, cv, entropy}
+```
+
+### Config (`MoEModelConfig`)
+
+```python
+@dataclass
+class MoEModelConfig:
+    vocab_size: int = 151936          # Qwen3 tokenizer
+    d_model: int = 640
+    n_layers: int = 16
+    n_q_heads: int = 10
+    n_kv_heads: int = 2               # GQA
+    head_dim: int = 64
+    rope_partial: int = 32            # half head_dim rotated
+    rope_theta: float = 10000.0
+    d_ff: int = 1024
+    n_routed_experts: int = 16        # variant A (dropped from 32 after NaN cascade)
+    n_shared_experts: int = 1
+    top_k: int = 2
+    moe_first_layer: int = 1          # layer 0 is dense
+    router_z_coef: float = 1e-3
+    router_aux_coef: float = 1e-3
+    router_noise_std: float = 0.0     # set to 0.1 during training for exploration
+    bias_update_rate: float = 1e-3
+    max_seq_len: int = 2048
+    tie_embeddings: bool = True
+```
+
+### SigmoidRouter (the patched, DDP-safe router)
+
+```python
+class SigmoidRouter(nn.Module):
+    def __init__(self, d_model, n_experts, top_k, ...):
+        super().__init__()
+        self.w = nn.Parameter(torch.zeros(n_experts, d_model))
+        nn.init.normal_(self.w, std=0.02)
+        self.register_buffer("bias", torch.zeros(n_experts))   # not a Parameter — manual updates
+        ...
+
+    def forward(self, x_flat):
+        # Entire routing path in fp32 to avoid fp16 overflow at extreme logits.
+        with torch.cuda.amp.autocast(enabled=False):
+            logits = F.linear(x_flat.float(), self.w.float())
+            scores = torch.sigmoid(logits)
+            sel_logits = logits + self.bias.float().unsqueeze(0)
+
+            # Training-time exploration noise (breaks load-imbalance lock-in).
+            if self.training and self.noise_std > 0:
+                sel_logits = sel_logits + torch.randn_like(sel_logits) * self.noise_std
+
+            topk_sel, topk_idx = torch.topk(sel_logits, k=self.top_k, dim=-1)
+            topk_weight = scores.gather(-1, topk_idx)
+            topk_weight = topk_weight / (topk_weight.sum(-1, keepdim=True) + 1e-9)
+
+            # ST-MoE z-loss + DeepSeek aux loss (small contribution; bias does heavy lifting)
+            lse = torch.logsumexp(logits, dim=-1)
+            z_loss = (lse ** 2).mean()
+            one_hot = F.one_hot(topk_idx, num_classes=self.n_experts).sum(dim=1)
+            p_i = scores.mean(dim=0)
+            aux_loss = self.n_experts * (one_hot.float().mean(0) * p_i).sum()
+
+            # Routing health metrics
+            counts = one_hot.sum(0).float()
+            cv = counts.std() / counts.mean().clamp_min(1.0)
+            p_avg = scores.mean(0).clamp_min(1e-9)
+            p_avg = p_avg / p_avg.sum()
+            entropy = -(p_avg * p_avg.log()).sum() / math.log(2.0)
+        return topk_idx, topk_weight, {"z_loss": z_loss, "aux_loss": aux_loss,
+                                        "counts": counts, "router_cv": cv,
+                                        "router_entropy_bits": entropy}
+
+    @torch.no_grad()
+    def step_bias_update(self, counts):
+        """Magnitude-based bias controller with starved-expert boost.
+
+        `counts` MUST be all-reduced across ranks before this call (see
+        train_200m.py). Otherwise DDP's `broadcast_buffers=True` overwrites
+        rank-1's bias view with rank-0's after every forward, silently losing
+        half the update signal.
+        """
+        counts_f = counts.float()
+        total = counts_f.sum().clamp_min(1.0)
+        p_i = counts_f / total
+        target_p = 1.0 / self.n_experts
+        err = target_p - p_i                              # positive => underloaded
+        # 10× boost for starved experts (load < 10% of fair)
+        starved = (p_i < 0.1 * target_p).float()
+        err = err + starved * 0.5
+        self.bias.add_(err * self.bias_update_rate)
+        self.bias.clamp_(-10.0, 10.0)
+```
+
+Caller side (in `train/train_200m.py`):
+
+```python
+# Critical: all-reduce counts across DDP ranks BEFORE step_router_biases,
+# otherwise the bias buffer drifts per-rank then gets clobbered by
+# broadcast_buffers=True.
+if world > 1:
+    for layer_counts in aux["counts_per_layer"]:
+        dist.all_reduce(layer_counts, op=dist.ReduceOp.SUM)
+target_model.step_router_biases(aux["counts_per_layer"])
+```
+
+### Loss path (Liger fused linear+CE)
+
+```python
+# train/train_200m.py — never materialize full (B, T, vocab=151936) logits.
+from liger_kernel.transformers.fused_linear_cross_entropy import (
+    LigerFusedLinearCrossEntropyLoss as LinCE,
+)
+loss = LinCE(reduction="mean")(
+    _input=h_scaled,             # (B*T, d_model) hidden states
+    lin_weight=embed_weight,     # (vocab, d_model) tied embedding
+    target=labels.view(-1),
+    bias=None,
+    ignore_index=-100,
+)
+```
+
+This saves ~4.7 GB peak per GPU vs chunked CE-with-checkpoint, freeing room for keeping MoE activations resident (no selective checkpoint needed → +20% throughput, was blocked only by Muon's NS momentum eating the headroom).
 
 ---
 
